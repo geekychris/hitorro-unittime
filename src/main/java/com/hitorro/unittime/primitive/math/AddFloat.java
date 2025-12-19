@@ -1,0 +1,125 @@
+package com.hitorro.unittime.primitive.math;
+
+/**
+ * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 11:50:26 PM
+ */
+public class AddFloat extends MathTimers {
+
+    private float xx, yy;
+
+    public AddFloat() {
+        super("x = x + y (local float)");
+        setIterations(100);
+    }
+
+    public void preTest() {
+        xx = yy = 0;
+    }
+
+    public void test() throws Exception {
+        float x, y;
+        x = xx;
+        y = yy;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        x = x + y;
+        xx = x;
+    }
+}
