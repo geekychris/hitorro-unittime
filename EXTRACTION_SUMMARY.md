@@ -256,7 +256,7 @@ UnitTimer          - Timer utilities
 ## Extraction Changes
 
 ### Package Rename
-- **From**: `ht.util.unittime` 
+- **From**: `com.hitorro.util.unittime` 
 - **To**: `com.hitorro.unittime`
 - **Reason**: Standard Java package naming
 
