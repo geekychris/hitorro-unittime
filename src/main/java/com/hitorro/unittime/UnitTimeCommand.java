@@ -11,6 +11,7 @@ import com.hitorro.util.commandandcontrol.ano.RespColumn;
 import com.hitorro.util.commandandcontrol.ano.ResponseDefinition;
 import com.hitorro.util.core.CPUInfo;
 import com.hitorro.util.core.Log;
+import com.hitorro.util.json.keys.DoubleProperty;
 import com.hitorro.util.json.keys.StringProperty;
 
 /**
@@ -31,6 +32,8 @@ public class UnitTimeCommand extends Command {
     private ResponseShape responseShape = new ResponseShape();
     @CommandArgument(required = false)
     private StringProperty TestName = new StringProperty("testname", "individual test to run", "");
+    @CommandArgument(required = false)
+    private DoubleProperty GHZ = new DoubleProperty("ghz", "ghz clock speed of cpu", 4.0);
 
     public UnitTimeCommand() {
         System.out.println();
@@ -43,7 +46,7 @@ public class UnitTimeCommand extends Command {
         response.setResponseShape(responseShape);
         
         // Detect CPU clock speed using CPUInfo utility
-        double gigahertz = 4.0; // Default fallback
+        double gigahertz = GHZ.apply(args); // Default fallback
         CPUInfo.ClockSpeed cpuSpeed = CPUInfo.getCPUClockSpeed();
         if (cpuSpeed != null) {
             gigahertz = cpuSpeed.getSpeedGHz();
