@@ -10,6 +10,7 @@ import com.hitorro.util.core.string.Fmt;
  */
 public class UnitTimeResult {
     public double milliSecondsPerUnit;
+	public double nsPerUnit;
     public double units;
     public String category;
     public String subCategory;
@@ -20,8 +21,8 @@ public class UnitTimeResult {
 
 
     public String toString() {
-        return Fmt.S("millispu: %s, units: %s, cat: %s, subcat: %s, uclass:%s",
-                milliSecondsPerUnit, units, category, subCategory, ClassUtil.getBareName(unitClass));
+        return Fmt.S("millispu: %s, nspu: %s, units: %s, cat: %s, subcat: %s, uclass:%s",
+                milliSecondsPerUnit, nsPerUnit, units, category, subCategory, ClassUtil.getBareName(unitClass));
     }
 
     public void addToRow(Response row) {
@@ -29,6 +30,7 @@ public class UnitTimeResult {
             row.addInfo(InfoLevel.Error, Fmt.S("Unhandled exception in %s %s %e", description, error, error));
         } else {
             row.addRow(Double.toString(milliSecondsPerUnit),
+					Double.toString(nsPerUnit),
                     Double.toString(units),
                     category,
                     subCategory,

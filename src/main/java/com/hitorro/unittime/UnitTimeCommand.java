@@ -19,6 +19,7 @@ public class UnitTimeCommand extends Command {
     @ResponseDefinition(command = "utr",
             rowname = "utr",
             columns = {@RespColumn(name = "ms_per_unit", lName = "msperunit", type = Double.class),
+					@RespColumn(name = "ns_per_unit", lName = "nsperunit", type = Double.class),
                     @RespColumn(name = "units", lName = "units", type = Double.class),
                     @RespColumn(name = "category", lName = "category"),
                     @RespColumn(name = "subcategory", lName = "subcategory"),
@@ -37,6 +38,7 @@ public class UnitTimeCommand extends Command {
         UnitTimeContext context = new UnitTimeContext();
         String singleTest = TestName.apply(args);
         response.setResponseShape(responseShape);
+
         context.runTests(response, singleTest);
         return true;
     }

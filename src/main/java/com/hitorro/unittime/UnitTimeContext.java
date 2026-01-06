@@ -265,16 +265,17 @@ public class UnitTimeContext {
             // we have an approx baseline for what a unit costs to execute (proxy for instruction cycle)
             double units = milliSecondsPerUnit / m_baseLineUnitCostMSecs;
 
-
             result.milliSecondsPerUnit = milliSecondsPerUnit;
+			result.nsPerUnit = milliSecondsPerUnit * 1000000;
             result.units = units;
             result.category = unit.getCategory();
             result.subCategory = unit.getSubCategory();
             result.description = unit.getDescription();
             result.unitClass = unit.getClass();
 
-            Log.unitTime.debug("%s, %s, %s, %s, %s, %s",
+            Log.unitTime.debug("%s, %s, %s, %s, %s, %s, %s",
                     Double.toString(milliSecondsPerUnit),
+					Double.toString(result.nsPerUnit),
                     Double.toString(units),
                     unit.getCategory(),
                     unit.getSubCategory(),
