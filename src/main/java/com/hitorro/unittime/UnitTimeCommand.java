@@ -9,6 +9,8 @@ import com.hitorro.util.commandandcontrol.ano.CommandArgument;
 import com.hitorro.util.commandandcontrol.ano.CommandDef;
 import com.hitorro.util.commandandcontrol.ano.RespColumn;
 import com.hitorro.util.commandandcontrol.ano.ResponseDefinition;
+import com.hitorro.util.core.CPUInfo;
+import com.hitorro.util.core.Log;
 import com.hitorro.util.json.keys.StringProperty;
 
 /**
@@ -21,6 +23,7 @@ public class UnitTimeCommand extends Command {
             columns = {@RespColumn(name = "ms_per_unit", lName = "msperunit", type = Double.class),
 					@RespColumn(name = "ns_per_unit", lName = "nsperunit", type = Double.class),
                     @RespColumn(name = "units", lName = "units", type = Double.class),
+                    @RespColumn(name = "instruction_cycles", lName = "instructioncycles", type = Double.class),
                     @RespColumn(name = "category", lName = "category"),
                     @RespColumn(name = "subcategory", lName = "subcategory"),
                     @RespColumn(name = "description", lName = "description"),
@@ -38,8 +41,18 @@ public class UnitTimeCommand extends Command {
         UnitTimeContext context = new UnitTimeContext();
         String singleTest = TestName.apply(args);
         response.setResponseShape(responseShape);
-
-        context.runTests(response, singleTest);
+        
+        // Detect CPU clock speed using CPUInfo utility
+        double gigahertz = 4.0; // Default fallback
+        CPUInfo.ClockSpeed cpuSpeed = CPUInfo.getCPUClockSpeed();
+        if (cpuSpeed != null) {
+            gigahertz = cpuSpeed.getSpeedGHz();
+            Log.util.info("Detected CPU speed: %.2f GHz", gigahertz);
+        } else {
+            Log.util.warn("Unable to detect CPU speed, using default: %.2f GHz", gigahertz);
+        }
+        
+        context.runTests(response, singleTest, gigahertz);
         return true;
     }
 

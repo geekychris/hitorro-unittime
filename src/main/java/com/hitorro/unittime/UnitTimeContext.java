@@ -40,6 +40,10 @@ public class UnitTimeContext {
     /* The cost of doing a local assignment, used as the machine-independent
     "unit". */
     public static double m_baseLineUnitCostMSecs = 0.0;
+    
+    /* CPU clock speed in GHz for instruction cycle calculation */
+    private double cpuGigahertz = 0.0;
+    
     private static UnitTimeContext utc = new UnitTimeContext();
     private boolean isInitialized = false;
 
@@ -108,8 +112,11 @@ public class UnitTimeContext {
      * Run all the tests that test our criteria.  We find the tests from scanning the classpath.
      *
      * @param response
+     * @param singleTest
+     * @param cpuGigahertz CPU clock speed in GHz for instruction cycle calculation
      */
-    public List<UnitTimeResult> runTests(Response response, String singleTest) {
+    public List<UnitTimeResult> runTests(Response response, String singleTest, double cpuGigahertz) {
+        this.cpuGigahertz = cpuGigahertz;
         List<UnitTimeResult> results = new ArrayList();
         HashMap<String, String> map = new HashMap<String, String>();
         List<UnitTimer> timers = getTests(map);
@@ -268,6 +275,17 @@ public class UnitTimeContext {
             result.milliSecondsPerUnit = milliSecondsPerUnit;
 			result.nsPerUnit = milliSecondsPerUnit * 1000000;
             result.units = units;
+            
+            // Calculate instruction cycles: nanoseconds × GHz = cycles
+            // nsPerUnit is in nanoseconds, cpuGigahertz is in GHz
+            // At N GHz, there are N cycles per nanosecond
+            // Therefore: cycles = nanoseconds × GHz
+            if (cpuGigahertz > 0) {
+                result.instructionCycles = result.nsPerUnit * cpuGigahertz;
+            } else {
+                result.instructionCycles = 0.0;
+            }
+            
             result.category = unit.getCategory();
             result.subCategory = unit.getSubCategory();
             result.description = unit.getDescription();

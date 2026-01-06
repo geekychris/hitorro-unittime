@@ -12,6 +12,7 @@ public class UnitTimeResult {
     public double milliSecondsPerUnit;
 	public double nsPerUnit;
     public double units;
+    public double instructionCycles;
     public String category;
     public String subCategory;
     public String description;
@@ -21,8 +22,8 @@ public class UnitTimeResult {
 
 
     public String toString() {
-        return Fmt.S("millispu: %s, nspu: %s, units: %s, cat: %s, subcat: %s, uclass:%s",
-                milliSecondsPerUnit, nsPerUnit, units, category, subCategory, ClassUtil.getBareName(unitClass));
+        return Fmt.S("millispu: %s, nspu: %s, units: %s, cycles: %s, cat: %s, subcat: %s, uclass:%s",
+                milliSecondsPerUnit, nsPerUnit, units, instructionCycles, category, subCategory, ClassUtil.getBareName(unitClass));
     }
 
     public void addToRow(Response row) {
@@ -32,6 +33,7 @@ public class UnitTimeResult {
             row.addRow(Double.toString(milliSecondsPerUnit),
 					Double.toString(nsPerUnit),
                     Double.toString(units),
+                    Double.toString(instructionCycles),
                     category,
                     subCategory,
                     description,
