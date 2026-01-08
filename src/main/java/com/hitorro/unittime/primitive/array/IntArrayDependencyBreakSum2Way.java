@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.array;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 11:50:41 PM
  */
 public class IntArrayDependencyBreakSum2Way extends ArrayTimers {
     private int list[] = new int[1000];

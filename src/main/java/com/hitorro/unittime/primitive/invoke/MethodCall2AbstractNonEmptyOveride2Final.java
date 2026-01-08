@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.invoke;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 11:50:56 PM
  */
 public class MethodCall2AbstractNonEmptyOveride2Final extends MethodCall2AbstractNonEmptyOveride {
     public MethodCall2AbstractNonEmptyOveride2Final() {

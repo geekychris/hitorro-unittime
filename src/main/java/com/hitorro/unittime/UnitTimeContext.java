@@ -13,7 +13,6 @@ import com.hitorro.unittime.primitive.BaseLineUnitTimer;
 import java.util.*;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 11:50:32 PM
  * <p/>
  * Find all timer tests that meet a criteria and then measure the amount of time taken to execute.
  * <p/>

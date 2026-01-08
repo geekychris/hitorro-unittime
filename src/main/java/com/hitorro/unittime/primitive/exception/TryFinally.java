@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.exception;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 23, 2006 Time: 12:10:24 AM
  */
 public class TryFinally extends ExceptionTimers {
 

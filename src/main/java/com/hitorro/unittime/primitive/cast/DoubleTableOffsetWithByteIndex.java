@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.cast;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 11:50:32 PM
  */
 public class DoubleTableOffsetWithByteIndex extends CastTimers {
     double m_table[];

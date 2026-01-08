@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.math;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 11:50:27 PM
  */
 public class AddIntStatic extends MathTimers {
     static int x;

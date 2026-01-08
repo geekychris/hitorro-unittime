@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.exception;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 23, 2006 Time: 12:04:04 AM
  */
 public class TryCatchBase extends ExceptionTimers {
 

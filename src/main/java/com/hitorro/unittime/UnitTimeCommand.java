@@ -15,7 +15,6 @@ import com.hitorro.util.json.keys.DoubleProperty;
 import com.hitorro.util.json.keys.StringProperty;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 6:47:16 PM
  */
 @CommandDef(command = "test.rununittime", description = "Execute unit time tests")
 public class UnitTimeCommand extends Command {

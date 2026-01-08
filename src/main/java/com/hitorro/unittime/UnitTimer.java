@@ -1,7 +1,6 @@
 package com.hitorro.unittime;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 22, 2006 Time: 6:23:50 PM
  * <p/>
  * Subclass this to measure the time of your particular "thing".  This is like JUnit TestCase for the timer world.
  */

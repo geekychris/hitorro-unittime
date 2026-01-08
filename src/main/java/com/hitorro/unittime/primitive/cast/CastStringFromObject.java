@@ -1,7 +1,6 @@
 package com.hitorro.unittime.primitive.cast;
 
 /**
- * Copyright (c) 2003 - present HiTorro All rights reserved. User: chris Date: Nov 24, 2006 Time: 9:49:12 PM
  */
 public class CastStringFromObject extends CastTimers {
 
