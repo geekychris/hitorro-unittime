@@ -24,7 +24,7 @@ import java.util.*;
 
 public class UnitTimeContext {
     /* The precision, in milliseconds, of System.currentTimeMillis (). */
-    public static double m_systemClockPrecisionInMsecs = 0.0;
+    public static double systemClockPrecisionInMsecs = 0.0;
 
     /* The requested maximum relative error. */
     public static double error = 0.01;
@@ -34,11 +34,11 @@ public class UnitTimeContext {
     public static double minExecutionTimeMsecs = 0.0;
 
     /* The overhead of doing one iteration of a test. */
-    public static double m_invokationOverheadMSecs = 0.0;
+    public static double invokationOverheadMSecs = 0.0;
 
     /* The cost of doing a local assignment, used as the machine-independent
     "unit". */
-    public static double m_baseLineUnitCostMSecs = 0.0;
+    public static double baseLineUnitCostMSecs = 0.0;
     
     /* CPU clock speed in GHz for instruction cycle calculation */
     private double cpuGigahertz = 0.0;
@@ -80,9 +80,9 @@ public class UnitTimeContext {
             totalDelta += t2 - t1;
         }
         // we took loopCount samples, so we are going to take the median
-        m_systemClockPrecisionInMsecs = (double) totalDelta / loopCount;
+        systemClockPrecisionInMsecs = (double) totalDelta / loopCount;
 
-        minExecutionTimeMsecs = (1.0 / error) * m_systemClockPrecisionInMsecs;
+        minExecutionTimeMsecs = (1.0 / error) * systemClockPrecisionInMsecs;
         if (response != null && response.getShape() == null) {
             ResponseShape shape = new ResponseShape("UnitTime", "row");
             shape.addHeader("execution time", "instructions", "category", "subcategory", "description", "class");
@@ -95,13 +95,13 @@ public class UnitTimeContext {
         //executeTest(null, new BaseLineUnitTimer());
         //executeTest(null, new BaseLineUnitTimer());
 
-        m_invokationOverheadMSecs = executeTest(new BaseLineUnitTimer()).milliSecondsPerUnit;
+        invokationOverheadMSecs = executeTest(new BaseLineUnitTimer()).milliSecondsPerUnit;
         // compute the cost of doing a local assignment considered one unit
 
-        m_baseLineUnitCostMSecs = executeTest(new com.hitorro.unittime.primitive.math.LocalAssignment()).milliSecondsPerUnit;
-        if (m_baseLineUnitCostMSecs < 0) {
+        baseLineUnitCostMSecs = executeTest(new com.hitorro.unittime.primitive.math.LocalAssignment()).milliSecondsPerUnit;
+        if (baseLineUnitCostMSecs < 0) {
             Log.util.error("baseline unit cost is smaller than 0");
-            m_baseLineUnitCostMSecs = executeTest(new com.hitorro.unittime.primitive.math.LocalAssignment()).milliSecondsPerUnit;
+            baseLineUnitCostMSecs = executeTest(new com.hitorro.unittime.primitive.math.LocalAssignment()).milliSecondsPerUnit;
         }
 
     }
@@ -240,11 +240,11 @@ public class UnitTimeContext {
                         // we have hit our target time
                         break;
                     } else {
-                        if (runTimeInMillis < 10 * m_systemClockPrecisionInMsecs) {
+                        if (runTimeInMillis < 10 * systemClockPrecisionInMsecs) {
                             n = 2 * n;
                         } else {
                             n = (long) Math.max(1.1 * n,
-                                    requiredExecTimeInMSecs / (runTimeInMillis - m_systemClockPrecisionInMsecs) * n);
+                                    requiredExecTimeInMSecs / (runTimeInMillis - systemClockPrecisionInMsecs) * n);
                         }
                         if (n < 0) {
 
@@ -257,19 +257,19 @@ public class UnitTimeContext {
                 unit.postTest();
             }
             // what does it cost to make 1 call
-            double individualCallTime = (runTimeInMillis / n) - m_invokationOverheadMSecs;
+            double individualCallTime = (runTimeInMillis / n) - invokationOverheadMSecs;
             if (individualCallTime < 0) {
                 // we are not that precise.  This call looks like it runs approx same as a invokation call
                 // jit could of defeated us.  I dont like negative values so lets make it a baseline unit cost
                 // we should perhaps consider running the tests again
                 Log.util.error("Reseting call time to baseline since it is negative (could be defeated by jit)");
-                individualCallTime = m_baseLineUnitCostMSecs;
+                individualCallTime = baseLineUnitCostMSecs;
             }
             // take account that 1 call my run whatever we are testing n times, then take account of the call cost
             double milliSecondsPerUnit = (individualCallTime / unit.getIterations()) - unit.getBaseMsecsPerTest();
 
             // we have an approx baseline for what a unit costs to execute (proxy for instruction cycle)
-            double units = milliSecondsPerUnit / m_baseLineUnitCostMSecs;
+            double units = milliSecondsPerUnit / baseLineUnitCostMSecs;
 
             result.milliSecondsPerUnit = milliSecondsPerUnit;
 			result.nsPerUnit = milliSecondsPerUnit * 1000000;
@@ -299,7 +299,7 @@ public class UnitTimeContext {
                     unit.getDescription(),
                     ClassUtil.getBareName(unit.getClass()));
             if (units < 0) {
-                Log.unitTime.info("Units < 0 %s, n=%s, m_systemClockPrecisionInMsecs=%s", Double.toString(units), n, m_systemClockPrecisionInMsecs);
+                Log.unitTime.info("Units < 0 %s, n=%s, systemClockPrecisionInMsecs=%s", Double.toString(units), n, systemClockPrecisionInMsecs);
             }
 
 

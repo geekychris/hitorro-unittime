@@ -6,9 +6,9 @@ package com.hitorro.unittime;
  */
 public abstract class UnitTimer {
     /* The total number of iterations to visible the test. */
-    private int m_totalIterations = 1;
+    private int totalIterations = 1;
 
-    private double m_baseMsecsPerTest = 0;
+    private double baseMsecsPerTest = 0;
 
     private int totalMsecs = 0;
 
@@ -37,19 +37,19 @@ public abstract class UnitTimer {
     }
 
     public int getIterations() {
-        return m_totalIterations;
+        return totalIterations;
     }
 
     public void setIterations(int iter) {
-        m_totalIterations = iter;
+        totalIterations = iter;
     }
 
     public double getBaseMsecsPerTest() {
-        return m_baseMsecsPerTest;
+        return baseMsecsPerTest;
     }
 
     public void setBaseMsecsPerTest(double d) {
-        m_baseMsecsPerTest = d;
+        baseMsecsPerTest = d;
     }
 
     public int getTotalMsecs() {
