@@ -1,8 +1,6 @@
 package com.hitorro.unittime.primitive.math;
 
-/**
- *
- */
+
 public class MathAbs extends MathTimers {
 
     private double a;

@@ -5,9 +5,7 @@ import com.hitorro.util.core.string.Fmt;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- *
- */
+
 public class MapGet extends ObjectTimers {
 
     static Map<String, String> map = new HashMap();

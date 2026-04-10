@@ -2,9 +2,7 @@ package com.hitorro.unittime;
 
 import com.hitorro.util.startupframework.phases.ServiceDefinition;
 
-/**
- *
- */
+
 @ServiceDefinition(dependentService = {},
         shortName = "unittime",
         description = "Run a unit time unit test",

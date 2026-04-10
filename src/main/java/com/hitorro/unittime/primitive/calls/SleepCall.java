@@ -1,8 +1,6 @@
 package com.hitorro.unittime.primitive.calls;
 
-/**
- *
- */
+
 public class SleepCall extends SystemCalls {
     public SleepCall() {
         super("Thread.sleep(1 second)");
