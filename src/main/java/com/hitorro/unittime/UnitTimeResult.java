@@ -1,16 +1,14 @@
 package com.hitorro.unittime;
 
-import com.hitorro.util.commandandcontrol.InfoLevel;
-import com.hitorro.util.commandandcontrol.Response;
 import com.hitorro.util.core.classes.ClassUtil;
 import com.hitorro.util.core.string.Fmt;
 
 /**
- * .
+ * Result of a single unit time benchmark measurement.
  */
 public class UnitTimeResult {
     public double milliSecondsPerUnit;
-	public double nsPerUnit;
+    public double nsPerUnit;
     public double units;
     public double instructionCycles;
     public String category;
@@ -20,24 +18,8 @@ public class UnitTimeResult {
 
     public Exception error;
 
-
     public String toString() {
         return Fmt.S("millispu: %s, nspu: %s, units: %s, cycles: %s, cat: %s, subcat: %s, uclass:%s",
                 milliSecondsPerUnit, nsPerUnit, units, instructionCycles, category, subCategory, ClassUtil.getBareName(unitClass));
-    }
-
-    public void addToRow(Response row) {
-        if (error != null) {
-            row.addInfo(InfoLevel.Error, Fmt.S("Unhandled exception in %s %s %e", description, error, error));
-        } else {
-            row.addRow(Double.toString(milliSecondsPerUnit),
-					Double.toString(nsPerUnit),
-                    Double.toString(units),
-                    Double.toString(instructionCycles),
-                    category,
-                    subCategory,
-                    description,
-                    ClassUtil.getBareName(unitClass));
-        }
     }
 }

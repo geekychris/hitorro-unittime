@@ -18,15 +18,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <hitorro-base.version>3.0.0</hitorro-base.version>
+        <hitorro-core.version>3.0.1</hitorro-core.version>
     </properties>
 
     <dependencies>
         <!-- Hitorro Dependencies -->
         <dependency>
             <groupId>com.hitorro</groupId>
-            <artifactId>hitorro-base</artifactId>
-            <version>${hitorro-base.version}</version>
+            <artifactId>hitorro-core</artifactId>
+            <version>${hitorro-core.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
