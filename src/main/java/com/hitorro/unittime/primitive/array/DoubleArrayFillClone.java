@@ -3,7 +3,7 @@ package com.hitorro.unittime.primitive.array;
 /**
  */
 public class DoubleArrayFillClone extends ArrayTimers {
-    public static final double VAL = Double.POSITIVE_INFINITY;
+    public static double VAL = Double.POSITIVE_INFINITY;
     private double[] d;
     private double[] dFill;
     private int n;
