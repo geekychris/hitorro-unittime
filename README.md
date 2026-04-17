@@ -1,403 +1,253 @@
-# Hitorro Unit Time
+# hitorro-unittime
 
-> Micro-benchmark and performance profiling toolkit for measuring Java operation execution times
-
-[![Java](https://img.shields.io/badge/Java-19%2B-orange)](https://openjdk.java.net/)
-[![Maven](https://img.shields.io/badge/Maven-3.6%2B-blue)](https://maven.apache.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+Micro-benchmarking and performance profiling toolkit for measuring Java operation execution times with nanosecond precision.
 
 ## Overview
 
-Hitorro Unit Time is a lightweight, high-precision performance measurement toolkit designed for micro-benchmarking Java operations. It provides tools to measure and compare execution times of primitive operations, data structure operations, and custom code blocks with nanosecond precision.
+The hitorro-unittime module provides a framework for measuring the cost of primitive Java operations, data structure operations, and custom code blocks. It carefully accounts for JVM overhead (system clock precision, method invocation cost, baseline assignment cost) to produce accurate measurements expressed in milliseconds, nanoseconds, relative units, and estimated CPU instruction cycles.
 
-### Key Features
+### Key Capabilities
 
-- ⚡ **High Precision** - Nanosecond-level timing measurements
-- 🎯 **Primitive Operations** - Built-in tests for arrays, casts, arithmetic
-- 📊 **Performance Profiling** - Command-based execution framework
-- 🔬 **Micro-Benchmarking** - Measure single operation performance
-- 📈 **Statistical Analysis** - Track and compare multiple runs
-- 🎪 **Extensible** - Easy to add custom performance tests
-- 🧪 **Unit Tested** - Comprehensive test coverage
+- **JVM Baseline Calibration** - Measures system clock precision, invocation overhead, and baseline unit cost before benchmarking
+- **Adaptive Iteration Scaling** - Automatically scales iteration counts to achieve target measurement accuracy
+- **104 Built-In Benchmarks** - Comprehensive coverage of arrays, arithmetic, casting, method invocation, objects, exceptions, threading, and system calls
+- **Extensible** - Subclass `UnitTimer` to add custom benchmarks, auto-discovered via classpath scanning
+- **CPU Cycle Estimation** - Optional conversion to estimated instruction cycles when CPU GHz is provided
+- **Template Method Lifecycle** - `init()` -> `preTest()` -> `test()` -> `postTest()` hooks
 
 ## Architecture
 
-```
-hitorro-unittime/
-├── UnitTimeContext      - Execution context and command management
-├── UnitTimeCommand      - Performance test command definition
-├── UnitTimeResult       - Timing results and metrics
-├── UnitTimeService      - Service coordination
-└── primitive/           - Primitive operation benchmarks
-    ├── array/          - Array operation tests
-    ├── cast/           - Type casting tests
-    ├── calls/          - Method call tests
-    └── object/         - Object operation tests (Map, List, etc.)
+```mermaid
+flowchart TD
+    UTC["UnitTimeContext\n(singleton orchestrator)"]
+
+    UTC --> INIT["init(error)\ncalibrates JVM baseline"]
+    INIT --> CLOCK["systemClockPrecisionInMsecs"]
+    INIT --> INVOKE["invokationOverheadMSecs\n(BaseLineUnitTimer)"]
+    INIT --> BASELINE["baseLineUnitCostMSecs\n(LocalAssignment)"]
+
+    UTC --> GETTESTS["getTests()\nclasspatch scan for UnitTimer subclasses"]
+    UTC --> EXEC["executeTest(UnitTimer)\nadaptive measurement loop"]
+    EXEC --> GC["GC before each iteration"]
+    EXEC --> SCALE["Scale iterations until\nruntime >= minExecutionTimeMsecs"]
+    EXEC --> SUB["Subtract invocation overhead"]
+    EXEC --> RESULT["Produce UnitTimeResult"]
+
+    UT["UnitTimer\n(abstract base)"]
+    UT --> PT["PrimitiveTimers\n(category: Datum)"]
+    PT --> ARR["ArrayTimers (21)"]
+    PT --> CAST["CastTimers (8)"]
+    PT --> MATH["MathTimers (23)"]
+    PT --> INV["InvokeTimers (31)"]
+    PT --> OBJ["ObjectTimers (5)"]
+    PT --> EXC["ExceptionTimers (5)"]
+    PT --> THR["ThreadTimers (5)"]
+    PT --> SYS["SystemCalls (4)"]
+    UT --> BL["BaseLineUnitTimer\n(hidden no-op)"]
 ```
 
-## Installation
+### Core Classes
 
-### Maven
+| Class | Purpose |
+|-------|---------|
+| `UnitTimer` | Abstract base class. Subclass and implement `test()` to measure an operation. |
+| `UnitTimeContext` | Singleton orchestrator. Calibrates JVM baseline, discovers tests via classpath scanning, runs benchmarks with adaptive iteration scaling. |
+| `UnitTimeResult` | Result container with `milliSecondsPerUnit`, `nsPerUnit`, `units` (relative to baseline), `instructionCycles`, `category`, `subCategory`, `description`, `unitClass`, and `error`. |
+| `PrimitiveTimers` | Abstract intermediate base for all primitive benchmarks (category: "Datum"). |
+| `BaseLineUnitTimer` | Hidden no-op timer for measuring method invocation overhead. |
+
+## Dependencies
+
+| Dependency | Version | Purpose |
+|-----------|---------|---------|
+| hitorro-core | 3.0.1 | ClassPathDeepIterator, ClassUtil, StringUtil, Fmt, Log |
+| junit | 4.13.2 | Testing (test scope) |
+| mockito-core | 5.7.0 | Mocking (test scope) |
+
+### Maven Coordinates
 
 ```xml
 <dependency>
     <groupId>com.hitorro</groupId>
     <artifactId>hitorro-unittime</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
 </dependency>
 ```
-
-### Gradle
-
-```gradle
-implementation 'com.hitorro:hitorro-unittime:3.0.0'
-```
-
-## Quick Start
-
-### Basic Timing
-
-```java
-import com.hitorro.unittime.*;
-
-// Create context
-UnitTimeContext context = new UnitTimeContext();
-
-// Define a command
-UnitTimeCommand command = new UnitTimeCommand("array.access", 10000);
-context.addCommand(command);
-
-// Execute and measure
-UnitTimeResult result = context.execute("array.access");
-
-// Get results
-System.out.println("Execution time: " + result.getExecutionTimeNanos() + " ns");
-System.out.println("Per operation: " + result.getExecutionTimeNanos() / 10000 + " ns");
-```
-
-### Comparing Operations
-
-```java
-UnitTimeContext context = new UnitTimeContext();
-
-// Test different operations
-context.addCommand(new UnitTimeCommand("arraylist.add", 1000));
-context.addCommand(new UnitTimeCommand("linkedlist.add", 1000));
-context.addCommand(new UnitTimeCommand("hashmap.put", 1000));
-
-// Execute all
-UnitTimeResult r1 = context.execute("arraylist.add");
-UnitTimeResult r2 = context.execute("linkedlist.add");
-UnitTimeResult r3 = context.execute("hashmap.put");
-
-// Compare
-System.out.println("ArrayList: " + r1.getExecutionTimeNanos() + " ns");
-System.out.println("LinkedList: " + r2.getExecutionTimeNanos() + " ns");
-System.out.println("HashMap: " + r3.getExecutionTimeNanos() + " ns");
-```
-
-## Core Components
-
-### UnitTimeContext
-
-Manages the execution environment for performance tests:
-
-```java
-UnitTimeContext context = new UnitTimeContext();
-
-// Add commands
-context.addCommand(new UnitTimeCommand("test.operation", 1000));
-
-// Execute
-UnitTimeResult result = context.execute("test.operation");
-
-// Get command
-UnitTimeCommand cmd = context.getCommand("test.operation");
-
-// List all commands
-Map<String, UnitTimeCommand> commands = context.getCommands();
-
-// Clear all
-context.clearCommands();
-```
-
-### UnitTimeCommand
-
-Defines a performance test command:
-
-```java
-// Basic command
-UnitTimeCommand command = new UnitTimeCommand("test.name", 1000);
-
-// Get properties
-String name = command.getName();
-int iterations = command.getIterations();
-```
-
-### UnitTimeResult
-
-Contains execution timing results:
-
-```java
-UnitTimeResult result = context.execute("test");
-
-// Get timing
-long nanos = result.getExecutionTimeNanos();
-String commandName = result.getCommandName();
-
-// Convert to different units
-double millis = nanos / 1_000_000.0;
-double seconds = nanos / 1_000_000_000.0;
-
-// Calculate per-iteration time
-long avgNanos = nanos / iterations;
-```
-
-## Primitive Operations
-
-### Array Operations
-
-Test array access and manipulation performance:
-
-```java
-// Array element access
-UnitTimeCommand arrayAccess = new UnitTimeCommand("array.access", 10000);
-
-// Array creation
-UnitTimeCommand arrayCreate = new UnitTimeCommand("array.create", 1000);
-
-// Array iteration
-UnitTimeCommand arrayIterate = new UnitTimeCommand("array.iterate", 1000);
-```
-
-### Object Operations
-
-Test collection and map operations:
-
-```java
-import com.hitorro.unittime.primitive.object.MapGet;
-
-MapGet mapGet = new MapGet();
-// Benchmark map get operations
-
-// Also available:
-// - List operations
-// - Set operations
-// - Queue operations
-```
-
-### Type Casting
-
-Measure casting performance:
-
-```java
-// Test casting between types
-UnitTimeCommand castTest = new UnitTimeCommand("cast.primitive", 10000);
-UnitTimeCommand castObject = new UnitTimeCommand("cast.object", 10000);
-```
-
-### Method Calls
-
-Measure method invocation overhead:
-
-```java
-UnitTimeCommand methodCall = new UnitTimeCommand("call.static", 10000);
-UnitTimeCommand virtualCall = new UnitTimeCommand("call.virtual", 10000);
-```
-
-## Use Cases
-
-### 1. Algorithm Comparison
-
-Compare different implementations:
-
-```java
-UnitTimeContext context = new UnitTimeContext();
-
-context.addCommand(new UnitTimeCommand("sort.bubble", 1000));
-context.addCommand(new UnitTimeCommand("sort.quick", 1000));
-context.addCommand(new UnitTimeCommand("sort.merge", 1000));
-
-// Execute and compare
-for (String name : new String[]{"sort.bubble", "sort.quick", "sort.merge"}) {
-    UnitTimeResult result = context.execute(name);
-    System.out.printf("%s: %d ns%n", name, result.getExecutionTimeNanos());
-}
-```
-
-### 2. Data Structure Selection
-
-Choose the best data structure for your use case:
-
-```java
-// Test different data structures
-context.addCommand(new UnitTimeCommand("arraylist.random", 1000));
-context.addCommand(new UnitTimeCommand("linkedlist.random", 1000));
-context.addCommand(new UnitTimeCommand("treeset.random", 1000));
-
-// Execute and analyze results
-```
-
-### 3. Optimization Verification
-
-Verify that optimizations actually improve performance:
-
-```java
-// Before optimization
-UnitTimeResult before = context.execute("operation.before");
-
-// After optimization
-UnitTimeResult after = context.execute("operation.after");
-
-// Compare
-long improvement = before.getExecutionTimeNanos() - after.getExecutionTimeNanos();
-double percent = (improvement * 100.0) / before.getExecutionTimeNanos();
-System.out.printf("Improvement: %.2f%%%n", percent);
-```
-
-### 4. JVM Warmup Analysis
-
-Measure JVM warmup effects:
-
-```java
-UnitTimeCommand command = new UnitTimeCommand("test", 1000);
-context.addCommand(command);
-
-// Run multiple times
-for (int i = 0; i < 10; i++) {
-    UnitTimeResult result = context.execute("test");
-    System.out.printf("Run %d: %d ns%n", i+1, result.getExecutionTimeNanos());
-}
-```
-
-## Best Practices
-
-### 1. Warmup the JVM
-
-```java
-// Run operations several times before measuring
-for (int i = 0; i < 5; i++) {
-    context.execute("test");
-}
-
-// Now measure
-UnitTimeResult result = context.execute("test");
-```
-
-### 2. Multiple Iterations
-
-```java
-// Use enough iterations for stable measurements
-UnitTimeCommand command = new UnitTimeCommand("test", 10000); // Not just 10
-```
-
-### 3. Statistical Analysis
-
-```java
-// Run multiple times and average
-long total = 0;
-int runs = 10;
-
-for (int i = 0; i < runs; i++) {
-    UnitTimeResult result = context.execute("test");
-    total += result.getExecutionTimeNanos();
-}
-
-long average = total / runs;
-System.out.println("Average: " + average + " ns");
-```
-
-### 4. Garbage Collection
-
-```java
-// Suggest GC before measurements
-System.gc();
-Thread.sleep(100);
-
-// Now measure
-UnitTimeResult result = context.execute("test");
-```
-
-## Performance Tips
-
-1. **Minimize Object Creation** - Reuse objects when possible
-2. **Avoid I/O** - Focus on CPU-bound operations
-3. **Disable JIT Optimizations** - For consistent results (if needed)
-4. **Use Sufficient Iterations** - At least 1000 for stable measurements
-5. **Warmup the JVM** - Run 5-10 warmup iterations
-6. **Isolate Tests** - Run one test at a time in production
-
-## Dependencies
-
-### Required
-- **hitorro-base**: 3.0.0 - Core utilities and infrastructure
-
-### Test
-- **JUnit**: 4.13.2
-- **Mockito**: 5.7.0
-
-## Testing
-
-The project includes comprehensive unit tests:
-
-```bash
-# Run all tests
-mvn test
-
-# Run specific test
-mvn test -Dtest=UnitTimeContextTest
-
-# Run with coverage
-mvn test jacoco:report
-```
-
-### Test Coverage
-
-- **UnitTimeContext**: Context management and command execution
-- **UnitTimeCommand**: Command creation and properties
-- **UnitTimeResult**: Result handling and metrics
-- **MapGet**: Primitive map operation testing
 
 ## Building
 
 ```bash
-# Clean and build
-./build.sh
+# Build the module (from the hitorro root)
+mvn clean install -pl hitorro-unittime
 
-# Or use Maven directly
-mvn clean install
+# Build without tests
+mvn clean install -pl hitorro-unittime -DskipTests
 
-# Skip tests
-mvn clean install -DskipTests
+# Build with all transitive dependencies
+mvn clean install -pl hitorro-unittime -am
 
-# Build with sources and javadocs
-mvn clean install -Psources,javadoc
+# Deploy to local Maven repo
+./build-and-deploy.sh --clean
 ```
 
-## Contributing
+## Testing
 
-1. Fork the repository
-2. Create your feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+```bash
+# Run all tests
+mvn test -pl hitorro-unittime
 
-## Version History
+# Run a specific test class
+mvn test -pl hitorro-unittime -Dtest=MapGetTest
 
-- **3.0.0** (Current) - Standalone release with Java 19+ support
-- **2.0** - Original monolith version
+# Run a specific test method
+mvn test -pl hitorro-unittime -Dtest=MapGetTest#testMapGetPerformance
+```
+
+### Test Coverage
+
+| Test Class | Coverage |
+|-----------|----------|
+| `MapGetTest` | HashMap.get operations: creation, existing/missing keys, types, empty map, null key, performance, consistency |
+| `UnitTimerTest` | UnitTimer construction, getters/setters, defaults, visibility, lifecycle methods |
+| `UnitTimeResultTest` | Result field initialization, toString, error handling |
+
+## Usage
+
+### Running All Benchmarks
+
+```java
+UnitTimeContext context = UnitTimeContext.getUnitTimeContext();
+List<UnitTimeResult> results = context.runAll(3.2); // CPU GHz for cycle estimation
+
+for (UnitTimeResult result : results) {
+    System.out.printf("%-40s %10.4f ns  %8.2f units  %8.1f cycles%n",
+        result.description, result.nsPerUnit, result.units, result.instructionCycles);
+}
+```
+
+### Running Filtered Benchmarks
+
+```java
+UnitTimeContext context = UnitTimeContext.getUnitTimeContext();
+
+// Filter by name or category (case-insensitive)
+List<UnitTimeResult> arrayResults = context.runFiltered("array", 3.2);
+List<UnitTimeResult> mathResults = context.runFiltered("math", 3.2);
+```
+
+### Listing Categories
+
+```java
+UnitTimeContext context = UnitTimeContext.getUnitTimeContext();
+List<String> categories = context.getCategories();
+// ["Datum", ...]
+
+int count = context.getTimerCount();
+// ~92 visible timers
+```
+
+### Creating a Custom Benchmark
+
+```java
+public class MyOperationTimer extends UnitTimer {
+    private MyObject obj;
+
+    public MyOperationTimer() {
+        super("My custom operation");
+        setIterations(100); // operations per test() call
+    }
+
+    @Override
+    public String getCategory() { return "Custom"; }
+
+    @Override
+    public String getSubCategory() { return "MyOps"; }
+
+    @Override
+    public void init() {
+        obj = new MyObject();
+    }
+
+    @Override
+    public void preTest() {
+        obj.reset();
+    }
+
+    @Override
+    public void test() throws Exception {
+        for (int i = 0; i < 100; i++) {
+            obj.doOperation();
+        }
+    }
+}
+```
+
+Custom timers placed in a package starting with `com.hitorro.unittime.` are auto-discovered. For other packages, register them with `context.addPackagePrefix("com.mypackage.")`.
+
+## Measurement Methodology
+
+### Baseline Calibration
+
+Before any benchmarks run, three calibration measurements are taken:
+
+1. **System clock precision** - How granular is `System.currentTimeMillis()`? (typically 1-15ms)
+2. **Invocation overhead** - Cost of calling `test()` with an empty body (`BaseLineUnitTimer`)
+3. **Baseline unit cost** - Cost of a local `int` assignment (`LocalAssignment`), treated as ~1 CPU instruction
+
+### Adaptive Iteration Scaling
+
+For fast operations that complete in less than the minimum execution time:
+1. If runtime < 10x clock precision, double the iteration count
+2. Otherwise, estimate iterations needed: `target / (runtime - clockPrecision) * currentN`
+3. Overflow protection prevents integer wrap-around
+
+### Result Calculation
+
+```
+individualCallTime = (totalRuntime / iterations) - invocationOverhead
+milliSecondsPerUnit = (individualCallTime / iterationsPerTest) - baseMsecsPerTest
+units = milliSecondsPerUnit / baseLineUnitCostMSecs
+nsPerUnit = milliSecondsPerUnit * 1_000_000
+instructionCycles = nsPerUnit * cpuGigahertz   (if provided)
+```
+
+### Error Control
+
+Default target: 0.5% relative error. Minimum execution time = `(1 / error) * clockPrecision`. GC is invoked between measurement iterations to reduce noise.
+
+## Built-In Benchmark Categories
+
+### Array Operations (21 timers)
+Array creation, 1D/2D element access, int/double summation loops, fill via for-loop/clone/System.arraycopy, 2-way and 4-way dependency-breaking loop unrolling.
+
+### Arithmetic (23 timers)
+Add/subtract/multiply/divide for int, long, float, double (local and member variables). Comparisons (greater-than, equals). `Math.abs()`, `Math.min()`, `Math.sqrt()`.
+
+### Method Invocation (31 timers)
+Empty and non-empty calls with 0-4 arguments. Abstract method dispatch, interface dispatch, virtual method overrides, final methods. Reflective invocation. Getter/setter pairs (int and Integer).
+
+### Type Casting (8 timers)
+String/interface casting from Object. Primitive conversions (byte->double, double->int). Array access with byte index conversion.
+
+### Object Operations (5 timers)
+Object instantiation (10-field class), casting, `instanceof`, `HashMap.get()`.
+
+### Exception Handling (5 timers)
+Try-catch overhead (with/without exception), try-finally, throws clause, exception throwing (20-frame deep).
+
+### Threading (5 timers)
+Thread creation+start, join, synchronized block, synchronized method, `Object.wait()`.
+
+### System Calls (4 timers)
+`System.currentTimeMillis()`, `System.nanoTime()`, `Thread.sleep()`.
+
+## Design Patterns
+
+- **Template Method** - `UnitTimer` defines lifecycle: `init()` -> `preTest()` -> `test()` -> `postTest()`
+- **Strategy** - Each concrete timer is a strategy for measuring a specific operation
+- **Singleton** - `UnitTimeContext` with static `getUnitTimeContext()`
+- **Reflective Discovery** - `ClassPathDeepIterator` scans classpath for `UnitTimer` subclasses
 
 ## License
 
-This project is licensed under the MIT License.
-
-## Support
-
-For questions, issues, or contributions:
-- **Issues**: GitHub Issues
-- **Email**: support@hitorro.com
-- **Documentation**: See QUICKSTART.md
-
-## Acknowledgments
-
-Built on the Hitorro framework for reliable Java performance measurement.
+MIT License - Copyright (c) 2006-2025 Chris Collins
