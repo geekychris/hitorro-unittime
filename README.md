@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Hitorro Unittime logo" width="180">
+</p>
+
 # hitorro-unittime
 
 Micro-benchmarking and performance profiling toolkit for measuring Java operation execution times with nanosecond precision.
