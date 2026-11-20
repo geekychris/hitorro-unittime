@@ -64,7 +64,7 @@ flowchart TD
 
 | Dependency | Version | Purpose |
 |-----------|---------|---------|
-| hitorro-core | 3.0.1 | ClassPathDeepIterator, ClassUtil, StringUtil, Fmt, Log |
+| hitorro-core | 4.0.0 | ClassPathDeepIterator, ClassUtil, StringUtil, Fmt, Log |
 | junit | 4.13.2 | Testing (test scope) |
 | mockito-core | 5.7.0 | Mocking (test scope) |
 
@@ -74,7 +74,7 @@ flowchart TD
 <dependency>
     <groupId>com.hitorro</groupId>
     <artifactId>hitorro-unittime</artifactId>
-    <version>3.0.1</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 
